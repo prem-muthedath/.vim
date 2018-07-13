@@ -53,7 +53,7 @@
 " b) press <S-:> to enter commandline
 " c) type below command in the commandline:
 "
-"     call OpenUrlUnderCursor 
+"     call OpenUrlUnderCursor()
 "
 " test urls:
 " 1. https://github.com/torvalds/pesconvert/blob/master/cairo.c#L32  blahh
