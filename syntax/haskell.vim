@@ -15,6 +15,19 @@
 "   -- created syn match haskellFunction -> ~ pattern as haskellIdentifier
 "   -- replaced haskellIdentifier w/t haskellFunction in haskellTypeSig
 "   -- in highlight def, linked haskellFunction to Function
+"
+" Prem: other changes -> turned off highlighting for:
+"   -- haskellSeparator
+"   -- haskellDelimiter
+" as they looked quite awful (RED) in solarized, while for apprentice and 
+" sorcerer, switching them off didn't impact the look at all.
+" 2-line code change:
+"     -- before:
+"           highlight def link haskellSeparator Delimiter
+"           highlight def link haskellDelimiter Delimiter
+"     -- after:
+"           highlight def link haskellSeparator NONE
+"           highlight def link haskellDelimiter NONE
 
 if version < 600
   syn clear
@@ -152,8 +165,8 @@ highlight def link haskellDefault Keyword
 highlight def link haskellConditional Conditional
 highlight def link haskellNumber Number
 highlight def link haskellFloat Float
-highlight def link haskellSeparator Delimiter
-highlight def link haskellDelimiter Delimiter
+highlight def link haskellSeparator NONE
+highlight def link haskellDelimiter NONE
 highlight def link haskellInfix Keyword
 highlight def link haskellOperators Operator
 highlight def link haskellQuote Operator
