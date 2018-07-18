@@ -1,10 +1,12 @@
 " source: https://gist.github.com/dave-kennedy/2188b3dd839ac4f73fe298799bb15f3b
-" orig source: https://stackoverflow.com/a/24046914/2571881
-" dave-kennedy's code a refinement of so code
+" -- orig source: https://stackoverflow.com/a/24046914/2571881
+" -- dave-kennedy's code a refinement of so code. for an exact copy of dave 
+"    kennedy's code, see  ~/dotfiles/vim/ext/togglecomment.vim
 " Prem:
 "   -- fine-tuned comment-map
-"   -- removed key mappings
-"   -- rest ~ as dave-keenedy
+"   -- localized function variables
+"   -- edited key mappings
+"   -- rest ~ as dave-kennedy
 
 let s:comment_map = {
     \   "c": '\/\/',
