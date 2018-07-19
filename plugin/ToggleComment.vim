@@ -110,14 +110,15 @@ function! ToggleComments() range abort
   "   5. when we comment, we insert the comment symbol at the same column for 
   "      all lines.  this column is the least non-blank virtual column in the 
   "      entire block.  we model this column in code using `l:block_col_min`.
-  "   6. when we uncomment, we may:
-  "         a) either just uncomment and do nothing else;
-  "         b) or we may uncomment & remove 1 space that immediately follows.
+  "   6. when we uncomment, we will choose one of the options below and apply 
+  "      that same option to every line in the block:
+  "         a) just uncomment and do nothing else;
+  "         b) or uncomment & remove 1 space that immediately follows.
   "      how do we decide?
   "         -- get the first line associated with `l:block_col_min`
   "         -- is that line's comment symbol followed by 0 spaces?
-  "         -- yes? => option (a)
-  "         -- no?  => option (b)
+  "         -- yes? => apply option (a) to every line in the block
+  "         -- no?  => apply option (b) to every line in the block
   "      `l:block_action` associated with `l:block_col_min` models this in code.
   " These rules match with those used in manual comment/uncomment using Ctrl-v
   let l:block_col_min = 1000
