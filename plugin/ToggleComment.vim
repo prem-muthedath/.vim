@@ -94,6 +94,11 @@ function! s:updateline(insert_col, block_action) abort
   endif
 endfunction
 
+function! s:comment(block_data)
+  let l:to_comment = filter(copy(a:block_data), 'v:val[1] == "comment"')
+  return !empty(l:to_comment)
+endfunction
+
 function! ToggleComments() range abort
   " Uniformly toggle comments for a block (i.e., a range of lines)
   " Rules:
@@ -129,13 +134,15 @@ function! ToggleComments() range abort
         \ ','.
         \ a:lastline.
         \ 'call s:scanline(l:block_data)'
+  if s:comment(l:block_data)
+    let l:block_action = "comment"
+  endif
   for [line_start_col, line_action] in l:block_data
-    if line_action == "comment"
-      let l:block_action = line_action
-    endif
     if line_start_col < l:block_col_min
       let l:block_col_min = line_start_col
-      if l:block_action != "comment" | let l:block_action = line_action | endif
+      if l:block_action != "comment"
+        let l:block_action = line_action
+      endif
     endif
   endfor
 
