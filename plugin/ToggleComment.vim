@@ -129,7 +129,7 @@ function! ToggleComments() range abort
   let l:block_col_min = 1000
   let l:block_data = []
   let l:block_action = ""
-  silent execute
+  execute
         \ a:firstline.
         \ ','.
         \ a:lastline.
@@ -146,7 +146,7 @@ function! ToggleComments() range abort
     endif
   endfor
 
-  silent execute
+  execute
         \ a:firstline.
         \ ','.
         \ a:lastline.
