@@ -38,6 +38,7 @@ function! s:commentleader() abort
   if has_key(s:comment_map, &filetype)
     return s:comment_map[&filetype]
   endif
+  throw "no comment leader found for " . &filetype
 endfunction
 
 function! s:scanline(block_data) abort
@@ -94,7 +95,7 @@ function! s:updateline(insert_col, block_action) abort
   endif
 endfunction
 
-function! s:comment(block_data)
+function! s:comment(block_data) abort
   let l:to_comment = filter(copy(a:block_data), 'v:val[1] == "comment"')
   return !empty(l:to_comment)
 endfunction
