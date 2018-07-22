@@ -32,7 +32,7 @@
 "       written using the . operator, a string concatenater.
 "       exec uses . operator to create one single string argument.
 "       for example, if your url is "google.com", you'll get:
-"           exec "open -a" . "/Applications/Safari.app" . "google.com"
+"           exec "open -a " . "/Applications/Safari.app " . "google.com"
 "       which will become:
 "           exec "open -a /Applications/Safari.app google.com"
 "    2. open -a -> open is an OS X command; -a option opens an application
