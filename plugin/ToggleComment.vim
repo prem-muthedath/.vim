@@ -70,32 +70,21 @@ function! s:scanline(block_data) abort
   endif
 endfunction
 
-function! s:uncomment()
-  " Uncomment the line but do not delete any spaces
-  execute 'normal ^' . len(s:commentleader()) . 'x'
-endfunction
-
-function! s:uncomment1()
-  " Uncomment the line + remove 1 space, if any, that immediately follows
-  call s:uncomment()
-  execute 's/\%' . virtcol('.') . 'v\s//'
-endfunction
-
-function! s:comment(pos)
-  " Comment the line + insert 1 space immediately after the comment symbol
-  execute 'normal ' . a:pos . '|i' . s:commentleader() . " \<Esc>"
-endfunction
-
 function! s:updateline(block_data) abort
   " Execute 'block action' -- comment/uncomment -- on current line
   if getline('.')  =~ '^\s*$'       " skip empty line
     echom "note: blank line(s) not commented"
   elseif a:block_data["action"] == "uncomment-1"
-    execute '.g/\v^\s*' . s:commentleader() . '/call s:uncomment1()'
+    " uncomment the line + remove 1 space, if any, that immediately follows
+    execute 'normal ^' . len(s:commentleader()) . 'x'
+    silent! execute 's/\%' . virtcol('.') . 'v\s//'
   elseif a:block_data["action"] == "uncomment"
-    execute '.g/\v^\s*' . s:commentleader() . '/call s:uncomment()'
+    " uncomment the line but do not delete any spaces
+    execute 'normal ^' . len(s:commentleader()) . 'x'
   elseif a:block_data["action"] == "comment"
-    call s:comment(a:block_data["insert_col"])
+    " comment the line + insert 1 space immediately after the comment symbol
+    let pos = a:block_data["insert_col"]
+    execute 'normal ' . pos . '|i' . s:commentleader() . " \<Esc>"
   else
     throw "s:updateline() -> no valid block action found"
   endif
