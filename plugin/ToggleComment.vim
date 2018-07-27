@@ -76,11 +76,11 @@ function! s:updateline(block_data) abort
     echom "note: blank line(s) not commented"
   elseif a:block_data["action"] == "uncomment-1"
     " uncomment the line + remove 1 space, if any, that immediately follows
-    execute 'normal ^' . len(s:commentleader()) . 'x'
+    execute 'normal ^' . len(s:commentleader()) . '"_x'
     silent! execute 's/\%' . virtcol('.') . 'v\s//'
   elseif a:block_data["action"] == "uncomment"
     " uncomment the line but do not delete any spaces
-    execute 'normal ^' . len(s:commentleader()) . 'x'
+    execute 'normal ^' . len(s:commentleader()) . '"_x'
   elseif a:block_data["action"] == "comment"
     " comment the line + insert 1 space immediately after the comment symbol
     let pos = a:block_data["insert_col"]
