@@ -31,7 +31,7 @@ let s:comment_map = {
       \   "eml": '>',
       \   "bat": 'REM',
       \   "ahk": ';',
-      \   "tex": '%',
+      \   "tex": '%'
       \ }
 
 function! s:commentleader() abort
@@ -42,31 +42,42 @@ function! s:commentleader() abort
 endfunction
 
 function! s:scanline(block_data) abort
-  " Scan current line and add its info to the block data
+  " Scan current line and, if relevant, update block data with line info
   " line info has 2 pieces:
   "   -- comment column (i.e., first non-blank virtual column)
   "   -- action, which describes what should be done to the line on toggle:
   "         1. uncomment-1: uncomment + remove 1 space that follows immediately
   "         2. uncomment: just uncomment; do not remove any spaces
   "         3. comment: comment the line
-  execute "normal ^"
-  if getline('.') =~ '^\s*' . s:commentleader() . ' '
-    call add(a:block_data, [virtcol('.'), "uncomment-1"])
-  elseif getline('.') =~ '^\s*' . s:commentleader() . '\S'
-    call add(a:block_data, [virtcol('.'), "uncomment"])
-  else
-    call add(a:block_data, [virtcol('.'), "comment"])
+  " we update block data if either/both of these conditions occur:
+  "   -- if line's comment column < insert_column in block data
+  "   -- if line's action is "comment", but block data's action is not
+  normal! ^
+  if getline('.') =~ '^\s*$'        " skip empty line
+    return
+  elseif getline('.') =~ '^\s*' . s:commentleader() . ' '
+    let l:line_action = "uncomment-1"
+  elseif getline('.') =~ '^\s*' . s:commentleader() . '\($\|\S\)'
+    let l:line_action = "uncomment"
+  elseif a:block_data["action"] != "comment"
+    let a:block_data["action"] = "comment"
+  endif
+  if virtcol('.') < a:block_data["insert_col"]
+    let a:block_data["insert_col"] = virtcol('.')
+    if a:block_data["action"] != "comment"
+      let a:block_data["action"] = l:line_action
+    endif
   endif
 endfunction
 
-function! s:updateline(insert_col, block_action) abort
+function! s:updateline(block_data) abort
   " Execute 'block action' -- comment/uncomment -- on current line
-  if getline('.')  =~ '^\s*$'
-    " skip empty line
+  if getline('.')  =~ '^\s*$'       " skip empty line
+    echom "note: blank line(s) not commented"
     return
   endif
-  if a:block_action == "uncomment-1"
-    " uncomment the line + remove 1 space that immediately follows
+  if a:block_data["action"] == "uncomment-1"
+    " uncomment the line + remove 1 space, if any, that immediately follows
     execute
           \ 'silent s/\v^\s*\zs' .
           \ '(' .
@@ -76,28 +87,25 @@ function! s:updateline(insert_col, block_action) abort
           \ s:commentleader() .
           \ ')' .
           \ '(\s*)\ze/\2/'
-  elseif a:block_action == "uncomment"
+  elseif a:block_data["action"] == "uncomment"
     " uncomment the line but do not delete any spaces
     execute
           \ 'silent s/\v^\s*\zs' .
           \ s:commentleader() .
           \ '(\s*)\ze/\1/'
-  else
+  elseif a:block_data["action"] == "comment"
     " comment the line + insert 1 space immediately after the comment symbol
     execute
           \ 'silent s/\v' .
           \ "\%" .
-          \ a:insert_col .
+          \ a:block_data["insert_col"] .
           \ "v" .
           \ '/' .
           \ s:commentleader()  .
           \ ' /'
+  else
+    throw "s:updateline() -> no valid block action found"
   endif
-endfunction
-
-function! s:comment(block_data) abort
-  let l:to_comment = filter(copy(a:block_data), 'v:val[1] == "comment"')
-  return !empty(l:to_comment)
 endfunction
 
 function! ToggleComments() range abort
@@ -106,7 +114,7 @@ function! ToggleComments() range abort
   "   1. comment/uncomment operations should never change the relative 
   "      indentation within the selected block.
   "   2. uniform block toggle -- i.e., on toggle, we either comment all lines or 
-  "      uncomment all lines.  we capture this in code using `l:block_action`.
+  "      uncomment all lines.  `l:block_data["action"]` models this in code.
   "   3. we uncomment all lines only if all lines are comments; else, we always 
   "      comment all lines, even if some lines are comments.
   "   4. when we uncomment, we only remove the leading comment symbol.  so if 
@@ -115,43 +123,21 @@ function! ToggleComments() range abort
   "      although now they will only have 1 leading comment symbol.
   "   5. when we comment, we insert the comment symbol at the same column for 
   "      all lines.  this column is the least non-blank virtual column in the 
-  "      entire block.  we model this column in code using `l:block_col_min`.
+  "      entire block.  `l:block_data["insert_col"]` models this in code.
   "   6. when we uncomment, we will choose one of the options below and apply 
   "      that same option to every line in the block:
-  "         a) just uncomment and do nothing else;
-  "         b) or uncomment & remove 1 space that immediately follows.
+  "         a) just uncomment and do nothing else; or,
+  "         b) uncomment & remove 1 space, if any, that immediately follows.
   "      how do we decide?
-  "         -- get the first line associated with `l:block_col_min`
+  "         -- find the first line in selection with the least comment column
   "         -- is that line's comment symbol followed by 0 spaces?
   "         -- yes? => apply option (a) to every line in the block
   "         -- no?  => apply option (b) to every line in the block
-  "      `l:block_action` associated with `l:block_col_min` models this in code.
+  "      `l:block_data["action"]` models this in code.
   " These rules match with those used in manual comment/uncomment using Ctrl-v
-  let l:block_col_min = 1000
-  let l:block_data = []
-  let l:block_action = ""
-  execute
-        \ a:firstline.
-        \ ','.
-        \ a:lastline.
-        \ 'call s:scanline(l:block_data)'
-  if s:comment(l:block_data)
-    let l:block_action = "comment"
-  endif
-  for [line_start_col, line_action] in l:block_data
-    if line_start_col < l:block_col_min
-      let l:block_col_min = line_start_col
-      if l:block_action != "comment"
-        let l:block_action = line_action
-      endif
-    endif
-  endfor
-
-  execute
-        \ a:firstline.
-        \ ','.
-        \ a:lastline.
-        \ 'call s:updateline(l:block_col_min, l:block_action)'
+  let l:block_data = { "action" : "", "insert_col" : 1000 }
+  execute a:firstline . ',' . a:lastline . 'call s:scanline(l:block_data)'
+  execute a:firstline . ',' . a:lastline . 'call s:updateline(l:block_data)'
 endfunction
 
 
