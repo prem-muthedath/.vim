@@ -218,22 +218,27 @@ function! ToggleComments() range abort
   "       - middle (m) -> for firstline < line < lastline: middle symbol ...
   "       - empty lastline (el): ... trailing symbol OR
   "       - non-empty lastline (l): middle symbol ... trailing symbol
-  let l:block_data = { "action" : "", "insert_col" : 1000 }
-  if a:firstline == a:lastline
-    execute a:firstline . s:scanstr(1)
-    execute a:firstline . s:lineupdate()
-  else
-    execute a:firstline . ',' . a:lastline . s:scanstr(0)
-    execute a:firstline . s:blockupdate('f')
-    if a:lastline > a:firstline + 1
-      execute (a:firstline+1) . ',' . (a:lastline-1) . s:blockupdate('m')
-    endif
-    if getline(a:lastline) =~ s:emptyllendpat()
-      execute a:lastline . s:blockupdate('el')
+  try
+    set formatoptions-=a          " turn off autoindent
+    let l:block_data = { "action" : "", "insert_col" : 1000 }
+    if a:firstline == a:lastline
+      execute a:firstline . s:scanstr(1)
+      execute a:firstline . s:lineupdate()
     else
-      execute a:lastline . s:blockupdate('l')
+      execute a:firstline . ',' . a:lastline . s:scanstr(0)
+      execute a:firstline . s:blockupdate('f')
+      if a:lastline > a:firstline + 1
+        execute (a:firstline+1) . ',' . (a:lastline-1) . s:blockupdate('m')
+      endif
+      if getline(a:lastline) =~ s:emptyllendpat()
+        execute a:lastline . s:blockupdate('el')
+      else
+        execute a:lastline . s:blockupdate('l')
+      endif
     endif
-  endif
+  finally
+    set formatoptions+=a
+  endtry
 endfunction
 
 
