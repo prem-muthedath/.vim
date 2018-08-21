@@ -3,8 +3,8 @@
 " -- dave-kennedy's code a refinement of so code. for an exact copy of dave 
 "    kennedy's code, see  ~/dotfiles/vim/ext/togglecomment.vim
 " Prem:
-"   --  handles both 1-part & 3-part (c-style) comments
 "   --  entirely re-designed -> almost no resemblance to dave-kennedy's code
+"   --  handles both 1-part & 3-part (c-style) comments
 "   --  extracts comment symbols from &commestring and &comments
 "   --  uses normal mode commands, almost entirely, for comment/uncomment
 
@@ -12,11 +12,11 @@ function! s:emptyllendpat() abort
   " Return regex pattern for end of an empty last line (ll) in comment block
   " for 3-part comment:
   "   -- '^\s*$' -> end of an empty uncommented ll
-  "   -- s:esc(s:cs()[2]) -> end of an empty commented ll
+  "   -- s:esc(Cs()[2]) -> end of an empty commented ll
   " for 1-part comment:
   "   -- '$a' -> matches nothing, as we don't need to match 'end' of line
-  if len(s:cs()) > 1
-    return '^\s*$' . '\|^\s*' . s:esc(s:cs()[2])
+  if len(Cs()) > 1
+    return '^\s*$' . '\|^\s*' . s:esc(Cs()[2])
   endif
   return '$a'
 endfunction
@@ -84,7 +84,7 @@ endfunction
 
 function! s:blockupdate(flag) abort
   " Using s:updatestr(), generate call-string for block comment/uncomment
-  "   -- for 1-part comment -- s:cs() = 1 -- treat entire block same
+  "   -- for 1-part comment -- Cs() = 1 -- treat entire block same
   "   -- for 3-part comment, generate call-string based on flag:
   "       1) f  ->  first line in comment block
   "       2) m  ->  middle part of block: firstline < line < lastline
@@ -95,14 +95,14 @@ function! s:blockupdate(flag) abort
   " -- execute calls this function only when it first evaluates expression to 
   "    generate the string, later used in line-by-line execution
   " -- expression evaluation occurs not for each line, but once per flag
-  if len(s:cs()) == 1 || a:flag == 'f'
-    return s:updatestr('s:cs()[0]', '""')
+  if len(Cs()) == 1 || a:flag == 'f'
+    return s:updatestr('Cs()[0]', '""')
   elseif a:flag == 'm'
-    return s:updatestr('" " . s:cs()[1]', '""')
+    return s:updatestr('" " . Cs()[1]', '""')
   elseif a:flag == 'el'
-    return s:updatestr('" " . s:cs()[2]', '""')
+    return s:updatestr('" " . Cs()[2]', '""')
   elseif a:flag == 'l'
-    return s:updatestr('" " . s:cs()[1]', 's:cs()[2]')
+    return s:updatestr('" " . Cs()[1]', 'Cs()[2]')
   else
     throw "s:blockupdate() -> no valid flag found"
   endif
@@ -110,11 +110,11 @@ endfunction
 
 function! s:lineupdate() abort
   " Generate, using updatestr(), call-string for linewise comment/uncomment
-  " call-string based on s:cs(), i.e., 1-part or 3-part comment
-  if len(s:cs()) == 1
-    return s:updatestr('s:cs()[0]', '""')
+  " call-string based on Cs(), i.e., 1-part or 3-part comment
+  if len(Cs()) == 1
+    return s:updatestr('Cs()[0]', '""')
   endif
-  return s:updatestr('s:cs()[0]', 's:cs()[2]')
+  return s:updatestr('Cs()[0]', 'Cs()[2]')
 endfunction
 
 function! s:scanline(block_data, commentpat) abort
@@ -152,44 +152,15 @@ function! s:esc(str) abort
   return escape(a:str, "\/*|")
 endfunction
 
-function! s:middle() abort
-  " Get middle part comment symbol from &comments for current buffer
-  let l:mb = filter(split(&comments, ','), 'v:val=~"mb:"')
-  if len(l:mb) == 1
-    return split(l:mb[0], ':')[1]
-  endif
-  throw "s:middle() -> no 'mb:' found for a 3-part comment in &comments"
-endfunction
-
-function! s:cs() abort
-  " Build a list of comment symbols for current buffer
-  "   -- comment symbols extracted from &commentstring and &comments
-  "   -- allowed list sizes: 1 (1-part comment) or 3 (3-part comment)
-  "   -- for list size 1, you just have a comment symbol @ start of line, used 
-  "      both for single lines as well as for a block of lines
-  "   -- for list size 3, you've 3 comment symbols:
-  "       -- start symbol @ start of first line of comment block
-  "       -- middle symbol @ start of lines > first and <= last
-  "       -- end symbol @ end of last line
-  " NOTE:
-  " single line has no "middle" line, & 1st line = last line, so line comment 
-  " (vs block) will just use 'start' & 'end' symbols of a 3-part comment
-  let l:comment = split(&commentstring, '%s')
-  if len(l:comment) == 2
-    let l:comment = [l:comment[0], s:middle(), l:comment[1]]
-  endif
-  return l:comment
- endfunction
-
 function! s:commentpat(linewise) abort
   " For current buffer, return comment symbol(s) as a regex pattern
   "   -- for 1-part comment, same regex for both linewise & block comment
   "   -- but for 3-part comment, regex based on linewise vs block
   "   -- regex pattern used in s:scanline() to detect a comment
   if a:linewise
-    return s:esc(s:cs()[0])
+    return s:esc(Cs()[0])
   endif
-  return '\(' . s:esc(join(s:cs(), '|')) . '\)'
+  return '\(' . s:esc(join(Cs(), '|')) . '\)'
 endfunction
 
 function! s:scanstr(linewise) abort
@@ -224,7 +195,7 @@ function! ToggleComments() range abort
   "         -- yes? => apply option (a) to every line in the block
   "         -- no?  => apply option (b) to every line in the block
   "      `l:block_data["action"]` models this in code.
-  "   7. tailing comment/uncomment:
+  "   7. trailing comment/uncomment:
   "       -- done only when &commentstring ~ 'leading-symbol%strailing-symbol'
   "       -- comment: add 1 \s followed by trailing comment symbol @ END
   "       -- uncomment: chop 1 \s, if any, + trailing comment symbol @ END
@@ -262,17 +233,6 @@ function! ToggleComments() range abort
     else
       execute a:lastline . s:blockupdate('l')
     endif
-  endif
-endfunction
-
-function! StartComment()
-  " Start a new comment line, right below current line, in insert mode
-  let l:execstr = 'normal o' . "\<Esc>" . 'tc' . '=='
-  if len(s:cs()) == 1
-    :execute l:execstr | :startinsert!
-  else
-    let l:cursorshift = len(s:cs()[0]) + 1
-    :execute l:execstr . '^' . l:cursorshift . 'l' | :startinsert
   endif
 endfunction
 
