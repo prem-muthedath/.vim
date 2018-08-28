@@ -95,7 +95,9 @@ function! s:blockupdate(flag) abort
   " -- execute calls this function only when it first evaluates expression to 
   "    generate the string, later used in line-by-line execution
   " -- expression evaluation occurs not for each line, but once per flag
-  if len(Cs()) == 1 || a:flag == 'f'
+  if len(Cs()) == 1 || Cs()[1] =~ '^\s*$'
+    return s:lineupdate()
+  elseif a:flag == 'f'
     return s:updatestr('Cs()[0]', '""')
   elseif a:flag == 'm'
     return s:updatestr('" " . Cs()[1]', '""')

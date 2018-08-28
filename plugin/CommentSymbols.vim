@@ -15,16 +15,16 @@ function! Cs() abort
   if len(l:comment) == 2
     let l:comment = [l:comment[0], s:middle(), l:comment[1]]
   endif
-  return l:comment
- endfunction
+  return map(l:comment, {key, val -> matchstr(val, '^\S\+\|^\s\+$')})
+endfunction
 
 function! s:middle() abort
   " Get middle part comment symbol from &comments for current buffer
-  let l:mb = filter(split(&comments, ','), 'v:val=~"mb:"')
-  if len(l:mb) == 1
+  let l:mb = filter(split(&comments, ','), {key, val -> val =~ 'mb:\|m:'})
+  if len(l:mb) >= 1
     return split(l:mb[0], ':')[1]
   endif
-  throw "s:middle() -> no 'mb:' found for a 3-part comment in &comments"
+  throw "s:middle() -> no 'mb:\|m:' found for a 3-part comment in &comments"
 endfunction
 
 
