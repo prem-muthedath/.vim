@@ -2,7 +2,8 @@
 
 function! Csformat()
   " Format file -- such as ~/dotfiles/vim/notes/cs.vim -- containing list of 
-  " filenames and &comments into neatly seperated columns
+  " filenames and &comments into neatly seperated columns;
+  " sample output: ~/dotfiles/vim/notes/cs-col.vim
   let m=0
   g/vim:/
         \ execute 'normal ' . "/^.*vim:/e" . "\<CR>" 
