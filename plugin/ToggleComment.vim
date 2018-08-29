@@ -84,8 +84,9 @@ endfunction
 
 function! s:blockupdate(flag) abort
   " Using s:updatestr(), generate call-string for block comment/uncomment
-  "   -- for 1-part comment -- Cs() = 1 -- treat entire block same
-  "   -- for 3-part comment, generate call-string based on flag:
+  "   -- for 1-part comment, Cs()=1, treat block as series of line comments
+  "   -- for 3-part comment, if middle empty, again, treat block as series of 
+  "      line comments; otherwise, generate call-string based on flag:
   "       1) f  ->  first line in comment block
   "       2) m  ->  middle part of block: firstline < line < lastline
   "       3) el ->  empty last line
@@ -113,6 +114,8 @@ endfunction
 function! s:lineupdate() abort
   " Generate, using updatestr(), call-string for linewise comment/uncomment
   " call-string based on Cs(), i.e., 1-part or 3-part comment
+  " NOTE: for 3-part comment, line comment will just use 'start' & 'end' 
+  " symbols, since single line has no "middle" line, & 1st line = last line
   if len(Cs()) == 1
     return s:updatestr('Cs()[0]', '""')
   endif

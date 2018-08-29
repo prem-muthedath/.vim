@@ -7,9 +7,10 @@
 "       -- start symbol @ start of first line of comment block
 "       -- middle symbol @ start of lines > first and <= last
 "       -- end symbol @ end of last line
+"   -- unless comment symbol entirely whitespace, trailing spaces removed
 " NOTE:
-" single line has no "middle" line, & 1st line = last line, so line comment 
-" (vs block) will just use 'start' & 'end' symbols of a 3-part comment
+" for 3-part comment, line comment, unlike block, will just use 'start' & 'end' 
+" symbols, since single line has no "middle" line, & 1st line = last line
 function! Cs() abort
   let l:comment = split(&commentstring, '%s')
   if len(l:comment) == 2
