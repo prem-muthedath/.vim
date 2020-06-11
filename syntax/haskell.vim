@@ -28,6 +28,9 @@
 "     -- after:
 "           highlight def link haskellSeparator NONE
 "           highlight def link haskellDelimiter NONE
+"
+" NOTE: added `return` to the list of haskellKeyword
+"
 
 if version < 600
   syn clear
@@ -82,7 +85,7 @@ syn match haskellImport "^\s*\<import\>\s\+\(\<safe\>\s\+\)\?\(\<qualified\>\s\+
   \ haskellBlockComment,
   \ haskellString,
   \ haskellPragma
-syn keyword haskellKeyword do case of
+syn keyword haskellKeyword do case of return
 if get(g:, 'haskell_enable_static_pointers', 0)
   syn keyword haskellStatic static
 endif
@@ -165,8 +168,8 @@ highlight def link haskellDefault Keyword
 highlight def link haskellConditional Conditional
 highlight def link haskellNumber Number
 highlight def link haskellFloat Float
-highlight def link haskellSeparator NONE
-highlight def link haskellDelimiter NONE
+highlight def link haskellSeparator Delimiter
+highlight def link haskellDelimiter Delimiter
 highlight def link haskellInfix Keyword
 highlight def link haskellOperators Operator
 highlight def link haskellQuote Operator
