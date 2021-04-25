@@ -29,7 +29,8 @@
 "           highlight def link haskellSeparator NONE
 "           highlight def link haskellDelimiter NONE
 "
-" NOTE: added `return` to the list of haskellKeyword
+" NOTE: added `return` `otherwise` to the list of haskellKeyword
+"       added keyword `haskellStdFunctions`
 "
 
 if version < 600
@@ -85,10 +86,11 @@ syn match haskellImport "^\s*\<import\>\s\+\(\<safe\>\s\+\)\?\(\<qualified\>\s\+
   \ haskellBlockComment,
   \ haskellString,
   \ haskellPragma
-syn keyword haskellKeyword do case of return
+syn keyword haskellKeyword do case of return otherwise
 if get(g:, 'haskell_enable_static_pointers', 0)
   syn keyword haskellStatic static
 endif
+syn keyword haskellStdFunctions show putStrLn putStr map mapM_ foldr length fmap
 syn keyword haskellConditional if then else
 syn match haskellNumber "\<[0-9]\+\>\|\<0[xX][0-9a-fA-F]\+\>\|\<0[oO][0-7]\+\>\|\<0[bB][10]\+\>"
 syn match haskellFloat "\<[0-9]\+\.[0-9]\+\([eE][-+]\=[0-9]\+\)\=\>"
@@ -158,6 +160,7 @@ if get(g:, 'haskell_enable_pattern_synonyms', 0)
   syn keyword haskellPatternKeyword pattern
 endif
 
+highlight def link haskellStdFunctions Keyword
 highlight def link haskellBottom Macro
 highlight def link haskellTH Boolean
 highlight def link haskellFunction Function
