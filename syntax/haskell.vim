@@ -90,7 +90,7 @@ syn keyword haskellKeyword do case of return otherwise
 if get(g:, 'haskell_enable_static_pointers', 0)
   syn keyword haskellStatic static
 endif
-syn keyword haskellStdFunctions show putStrLn putStr map mapM_ foldr length fmap
+syn keyword haskellStdFunctions and or not any all sum filter map mapM_ foldr length zip id fmap show print putStrLn putStr
 syn keyword haskellConditional if then else
 syn match haskellNumber "\<[0-9]\+\>\|\<0[xX][0-9a-fA-F]\+\>\|\<0[oO][0-7]\+\>\|\<0[bB][10]\+\>"
 syn match haskellFloat "\<[0-9]\+\.[0-9]\+\([eE][-+]\=[0-9]\+\)\=\>"
