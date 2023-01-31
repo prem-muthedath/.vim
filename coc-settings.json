@@ -1,0 +1,20 @@
+{
+  "suggest.autoTrigger": "none",
+  "languageserver": {
+    "haskell": {
+      "command": "haskell-language-server-wrapper",
+      "args": [ "--lsp" ],
+      "rootPatterns": [
+        "*.cabal",
+        "cabal.config",
+        "cabal.project",
+        "hie.yaml"
+      ],
+      "filetypes": [
+        "hs",
+        "lhs",
+        "haskell"
+      ]
+    }
+  }
+}
